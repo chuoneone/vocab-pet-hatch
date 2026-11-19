@@ -1,0 +1,16 @@
+{
+  "title": "魔法寵物孵化屋",
+  "subtitle": "我的夢想單字",
+  "lang": "en-US",
+  "words": [
+    { "en": "gift", "zh": "天分；禮物", "emoji": "🎁", "sent": "He has a <mark>gift</mark> for music.", "sentZh": "他對音樂很有天分。", "soundalike": ["gifts", "give", "lift", "shift", "gif"] },
+    { "en": "tell / told", "say": "tell, told", "zh": "講；告訴", "emoji": "🗣️", "sent": "Please <mark>tell</mark> me the story.", "sentZh": "請告訴我這個故事。", "soundalike": ["tells", "tail", "tall", "tale", "bell", "toll", "hold", "cold", "gold"] },
+    { "en": "funny", "zh": "好笑的", "emoji": "🤣", "sent": "The movie is very <mark>funny</mark>.", "sentZh": "這部電影非常好笑。", "soundalike": ["fun", "sunny", "bunny", "honey", "money"] },
+    { "en": "plan", "zh": "計畫", "emoji": "📝", "sent": "We <mark>plan</mark> to take a trip.", "sentZh": "我們計畫去旅行。", "soundalike": ["plans", "plane", "plant", "plain", "pan"] },
+    { "en": "star", "zh": "明星；星星", "emoji": "⭐", "sent": "She wants to be a movie <mark>star</mark>.", "sentZh": "她想成為電影明星。", "soundalike": ["stars", "start", "store", "scar", "car"] },
+    { "en": "without", "zh": "沒有", "emoji": "🚫", "sent": "I cannot live <mark>without</mark> music.", "sentZh": "我不能沒有音樂。", "soundalike": ["with", "out", "about", "within"] },
+    { "en": "dream", "zh": "夢想；夢見", "emoji": "💭", "sent": "My <mark>dream</mark> is to be a singer.", "sentZh": "我的夢想是當歌手。", "soundalike": ["dreams", "stream", "cream", "team", "drum"] },
+    { "en": "teenager", "zh": "青少年", "emoji": "🧑", "sent": "He is a happy <mark>teenager</mark>.", "sentZh": "他是一位快樂的青少年。", "soundalike": ["teenagers", "teen", "teens", "danger", "manager"] },
+    { "en": "exciting", "zh": "令人興奮的", "emoji": "🎢", "sent": "The game is so <mark>exciting</mark>!", "sentZh": "這場比賽太刺激了！", "soundalike": ["excited", "excite", "sighting", "lighting"] }
+  ]
+}
