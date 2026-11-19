@@ -99,7 +99,9 @@
     .panel { width: min(640px, 100%); max-height: calc(100% - 16px); overflow-y: auto; padding: 18px 22px; touch-action: pan-y; }
     .panel h2 { font-size: 30px; margin: 0 0 8px; color: #e26d5c; text-align: center; }
     .panel p { font-size: 18px; line-height: 1.7; margin: 8px 0; }
-    .rule { font-size: 16px; background: #ffe9d6; border: 3px solid #4a3424; padding: 8px 12px; line-height: 1.6; }
+    .intro-panel { width: min(440px, 100%); text-align: center; }
+    .panel p.intro-sub { font-size: 16px; color: #8a7360; margin: 0 0 10px; }
+    .panel p.intro-main { font-size: 20px; font-weight: 700; line-height: 1.6; margin: 0 0 16px; }
     .warn { font-size: 15px; background: #ffe1e1; border: 3px solid #b4233a; color: #8a1f2e; padding: 6px 10px; margin: 8px 0; display: none; }
     #finList { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 8px 0 12px; }
     #finList span { background: #fff; border: 2px solid #4a3424; padding: 2px 8px; font-size: 15px; font-weight: 700; }
@@ -204,16 +206,12 @@
   <div id="flash"></div>
 
   <div class="overlay show" id="intro">
-    <div class="panel bt-box">
+    <div class="panel bt-box intro-panel">
       <h2>🥚 <span id="introTitle"></span></h2>
-      <p id="introText"></p>
-      <p>你是今天的<b>寵物飼養員</b>：大聲把單字唸出來，就能餵蛋裡的小寵物吃東西，讓牠<b>越長越大、破蛋出生</b>！</p>
-      <div class="rule">🍖 唸對餵 3 個食物、很接近餵 2 個、有開口餵 1 個，飽食度集滿 6 格就破蛋出生！<br>
-        ⭐ 分數只算每顆蛋的前 2 次唸讀，滿分 100。<br>
-        💛 唸不好也沒關係，再唸一次就能繼續餵食。</div>
-      <div class="warn" id="srWarn">⚠️ 這個瀏覽器不支援語音辨識，只能用「有沒有出聲」來判斷。想要聽懂你唸什麼，請改用電腦版 Chrome 或 Edge 開啟。</div>
-      <p style="font-size:15px;color:#6b5646;margin:6px 0 10px">🎤 第一次唸的時候，瀏覽器會問能不能用麥克風，請按「允許」。</p>
-      <div style="text-align:center"><button class="btn btn-go" id="startBtn" style="font-size:22px;padding:11px 34px">開始孵蛋！Hatch ▶</button></div>
+      <p id="introText" class="intro-sub"></p>
+      <p class="intro-main">大聲唸單字，餵蛋裡的寵物。<br>吃飽 6 個就破蛋出生！</p>
+      <div class="warn" id="srWarn">⚠️ 這個瀏覽器聽不懂單字，請改用電腦版 Chrome 或 Edge。</div>
+      <div style="text-align:center"><button class="btn btn-go" id="startBtn" style="font-size:22px;padding:11px 34px">開始孵蛋 ▶</button></div>
     </div>
   </div>
 
@@ -271,7 +269,9 @@ const GAME = {"title": "魔法寵物孵化屋", "subtitle": "我的夢想單字"
   if (IMG.bg) document.documentElement.style.setProperty('--bg', `url("${IMG.bg}")`);
   $('title').textContent = '🥚 ' + GAME.title;
   $('introTitle').textContent = GAME.title;
-  $('introText').innerHTML = `這裡有 <b>${WORDS.length} 顆神秘寵物蛋</b>，每一顆代表一個單字` + (GAME.subtitle ? `（<b>${esc(GAME.subtitle)}</b>）` : '') + '，裡面的小寵物正等著吃飽長大！';
+  $('petImg').src = petSrc('egg');
+  $('petImg').classList.add('wobble');
+  $('introText').textContent = (GAME.subtitle ? GAME.subtitle + ' · ' : '') + `${WORDS.length} 個單字`;
   $('finTitle').textContent = `🎉 ${WORDS.length} 隻寵物全部破蛋出生了！`;
 
   // ==================== 存檔（只存在這台電腦的瀏覽器） ====================
@@ -544,7 +544,7 @@ const GAME = {"title": "魔法寵物孵化屋", "subtitle": "我的夢想單字"
     $('cardBtns').innerHTML = `<button class="btn btn-icon btn-listen" id="lisBtn" title="聽發音" aria-label="聽發音">🔊</button>` +
       `<button class="btn btn-icon btn-mic" id="micBtn" title="我來唸" aria-label="我來唸">🎤</button>`;
     $('lisBtn').onclick = () => playWord(w); $('micBtn').onclick = startListen;
-    $('feedback').innerHTML = done ? '✅ 已經破蛋出生了！想再練習可以按 🎤（不會再加分）。' : '先按 🔊 聽一次，再按 🎤 大聲唸出來餵食物！';
+    $('feedback').innerHTML = done ? '✅ 已經破蛋出生了！想再練習可以按 🎤（不會再加分）。' : '';
     $('card').style.display = 'block';
     renderEnergy(); renderHud(); renderNests();
     setTimeout(() => playWord(w), 500);
