@@ -4,13 +4,12 @@
 用法：
     python scripts/build.py words.json -o pet-hatch.html
 
-- 只用 Python 標準函式庫；有裝 Pillow 時會把單字圖片縮小成 320px 的 webp，檔案比較小。
+- 只用 Python 標準函式庫，不需要安裝套件。
 - 寵物、蛋、背景圖片會直接嵌進 HTML，產出的檔案可以單獨寄給學生或放上任何網站。
 - 單字超過 9 個時，自動拆成多個檔案（-1.html、-2.html…），每個檔案最多 9 顆蛋。
 """
 import argparse
 import base64
-import io
 import json
 import math
 import mimetypes
@@ -27,24 +26,9 @@ PLACEHOLDER = "/*__GAME_DATA__*/null"
 mimetypes.add_type("image/webp", ".webp")
 
 
-def data_uri(path: Path, shrink: bool = False) -> str:
-    raw = path.read_bytes()
+def data_uri(path: Path) -> str:
     mime = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
-    if shrink:
-        try:
-            from PIL import Image  # 選用：有 Pillow 才縮圖
-
-            with Image.open(io.BytesIO(raw)) as im:
-                im.thumbnail((320, 320))
-                buf = io.BytesIO()
-                im.save(buf, "WEBP", quality=82)
-                raw, mime = buf.getvalue(), "image/webp"
-        except ImportError:
-            if len(raw) > 400_000:
-                print(f"  提醒：{path.name} 有 {len(raw) // 1024} KB，裝 Pillow（pip install pillow）可自動縮小。", file=sys.stderr)
-        except Exception as e:  # 圖片壞掉就原樣嵌入
-            print(f"  提醒：{path.name} 無法縮圖（{e}），原樣嵌入。", file=sys.stderr)
-    return f"data:{mime};base64,{base64.b64encode(raw).decode('ascii')}"
+    return f"data:{mime};base64,{base64.b64encode(path.read_bytes()).decode('ascii')}"
 
 
 def check_words(words):
@@ -55,25 +39,13 @@ def check_words(words):
                 errors.append(f"第 {n} 個單字缺少 \"{key}\"")
         if w.get("sent") and "<mark>" not in w["sent"]:
             errors.append(f"第 {n} 個單字（{w.get('en')}）的例句沒有用 <mark> 標出單字")
-        if not w.get("emoji") and not w.get("image"):
-            errors.append(f"第 {n} 個單字（{w.get('en')}）沒有 emoji 也沒有 image，圖卡會是空的")
     return errors
 
 
-def build_page(template: str, data: dict, words: list, base_dir: Path) -> str:
+def build_page(template: str, data: dict, words: list) -> str:
     images = {"egg": data_uri(PET_DIR / "egg.webp"), "bg": data_uri(PET_DIR / "bg.webp")}
     for key in PET_KEYS[: len(words)]:
         images[key] = data_uri(PET_DIR / f"{key}.webp")
-    for i, w in enumerate(words):
-        if w.get("image"):
-            p = (base_dir / w["image"]).resolve()
-            if p.exists():
-                images[f"word:{i}"] = data_uri(p, shrink=True)
-            else:
-                print(f"  提醒：找不到圖片 {w['image']}，{w['en']} 改用 emoji。", file=sys.stderr)
-                w = dict(w)
-                w.pop("image")
-                words[i] = w
     game = {k: v for k, v in data.items() if k != "words"}
     game["words"] = words
     game["images"] = images
@@ -120,7 +92,7 @@ def main():
             target = out.with_name(f"{out.stem}-{g + 1}{out.suffix}")
         else:
             target = out
-        target.write_text(build_page(template, page, chunk, src.parent), encoding="utf-8")
+        target.write_text(build_page(template, page, chunk), encoding="utf-8")
         written.append(target)
 
     for t in written:

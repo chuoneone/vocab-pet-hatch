@@ -73,8 +73,6 @@
     .en-cell.on { background: #ffd24d; box-shadow: inset 0 -5px 0 #f2a024; transform: scale(1.05); }
     #cardLine { font-size: 17px; font-weight: 700; color: #6b4a2e; margin-bottom: 6px; line-height: 1.4; }
     #cardTop { display: flex; gap: 14px; align-items: center; }
-    #cardPic { width: 82px; height: 82px; background: #fdebc4; border: 4px solid #4a3424; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 50px; line-height: 1; overflow: hidden; }
-    #cardPic img { width: 100%; height: 100%; object-fit: cover; }
     #cardWord { font-size: 38px; line-height: 1.05; color: #a8451f; font-weight: 700; }
     #cardZh { font-size: 19px; font-weight: 900; color: #6b5646; margin-top: 2px; }
     #cardSent { font-size: 17px; margin-top: 3px; line-height: 1.35; color: #4a3424; }
@@ -135,7 +133,6 @@
       #wantBubble { font-size: 14px; padding: 3px 10px; }
       .fin-pet img { width: 78px; height: 78px; }
       #card { padding: 10px 12px; }
-      #cardPic { width: 72px; height: 72px; font-size: 44px; }
       #cardWord { font-size: 32px; }
       #cardSent { font-size: 15px; }
       #cardSent small { display: none; }
@@ -156,7 +153,6 @@
       #petImg { width: 116px; height: 116px; }
       .en-cell { width: 18px; height: 16px; }
       #card { bottom: 5px; padding: 7px 12px; }
-      #cardPic { width: 58px; height: 58px; font-size: 36px; }
       #cardWord { font-size: 28px; }
       #cardZh { font-size: 15px; }
       #cardBtns { margin-top: 5px; gap: 6px; }
@@ -195,7 +191,6 @@
     <div id="cardHead"><span id="who"></span><span id="energy"></span></div>
     <div id="cardLine"></div>
     <div id="cardTop">
-      <div id="cardPic"></div>
       <div style="min-width:0">
         <div id="cardWord" class="en"></div>
         <div id="cardZh"></div>
@@ -544,8 +539,6 @@ const GAME = /*__GAME_DATA__*/null;
     updateSpotlightVisual(i, S.shown[i]);
     $('who').textContent = done ? `寵物 ${i + 1}：${w.petName} ⭐` : `寵物蛋 ${i + 1}：${w.who}`;
     $('cardLine').textContent = w.line;
-    const pic = w.image ? IMG['word:' + i] : '';
-    $('cardPic').innerHTML = pic ? `<img src="${pic}" alt="${esc(w.en)}">` : esc(w.emoji || '🔤');
     $('cardWord').textContent = w.en; $('cardZh').textContent = w.zh;
     $('cardSent').innerHTML = w.sent ? sentHtml(w.sent) + (w.sentZh ? `<small>${esc(w.sentZh)}</small>` : '') : '';
     $('cardBtns').innerHTML = `<button class="btn btn-icon btn-listen" id="lisBtn" title="聽發音" aria-label="聽發音">🔊</button>` +

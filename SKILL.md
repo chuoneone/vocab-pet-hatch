@@ -13,7 +13,6 @@ description: 把一串英文單字做成「魔法寵物孵化屋」單字朗讀�
 | `assets/pets/` | 蛋、背景與 9 隻寵物圖，腳本會自動嵌進網頁 |
 | `scripts/build.py` | 把單字 JSON 套進模板，輸出單一 HTML |
 | `examples/words-example.json` | 單字資料範例 |
-| `references/image-generation.md` | 想替單字配插圖時才讀 |
 
 ## 流程
 
@@ -34,7 +33,7 @@ description: 把一串英文單字做成「魔法寵物孵化屋」單字朗讀�
   "subtitle": "Unit 4 單字 21-29",
   "lang": "en-US",
   "words": [
-    { "en": "tell / told", "say": "tell, told", "zh": "講；告訴", "emoji": "🗣️",
+    { "en": "tell / told", "say": "tell, told", "zh": "講；告訴",
       "sent": "Please <mark>tell</mark> me the story.", "sentZh": "請告訴我這個故事。",
       "soundalike": ["tells", "tail", "tall", "toll", "hold"] }
   ]
@@ -45,12 +44,10 @@ description: 把一串英文單字做成「魔法寵物孵化屋」單字朗讀�
 |---|---|---|
 | `en` | ✅ | 要唸的單字或片語。動詞三態等多種形式用 ` / ` 隔開，唸到其中一個就算對 |
 | `zh` | ✅ | 中文意思，簡短，多個意思用「；」 |
-| `emoji` | ✅ | 單字圖卡用的一個 emoji，選學生一看就懂的；抽象字選最接近的情境 |
 | `sent` | 建議 | 簡短例句，用 `<mark>` 標出單字；學生程度低時用 8 個字以內的句子 |
 | `sentZh` | 建議 | 例句翻譯 |
 | `soundalike` | 建議 | 語音辨識常把這個字聽成的字（見下方） |
 | `say` | 選填 | 唸給學生聽的文字跟 `en` 不同時才填，例如 `"tell, told"` |
-| `image` | 選填 | 單字插圖路徑（相對於 JSON 檔），有圖就不用 emoji，見 `references/image-generation.md` |
 | `line` | 選填 | 卡片上的劇情句，不填會自動產生「🍖 小柴犬蛋肚子好餓！唸出「講；告訴」，餵牠吃…」 |
 
 `subtitle` 寫範圍，例如「Unit 4 單字 21-29」。`lang` 預設 `en-US`，教其他語言時改成對應代碼（例如 `ja-JP`），但寵物介面文字仍是中文。
@@ -64,22 +61,18 @@ description: 把一串英文單字做成「魔法寵物孵化屋」單字朗讀�
 
 這些字只會讓學生拿到「很接近」（餵 2 個），不會算成完全正確。
 
-### 3. （選用）幫單字配插圖
-
-預設用 emoji 就能玩，**不需要生圖**。只有在使用者要求插圖，或你所在的環境本身就能生圖（例如 Codex、Antigravity）時，才讀 `references/image-generation.md`。生圖前先跟使用者確認，因為會花時間與額度。
-
-### 4. 產生網頁
+### 3. 產生網頁
 
 ```bash
 python <skill 資料夾>/scripts/build.py words.json -o <檔名>.html
 ```
 
-- 只需要 Python 3，不需要安裝套件。有 Pillow 時會自動把單字插圖縮小。
+- 只需要 Python 3，不需要安裝套件。
 - 腳本會檢查資料，缺欄位或例句沒有 `<mark>` 會直接列出問題，照訊息修正 JSON 再跑一次。
 - 檔名用英文與數字，例如 `unit4-words-21-29.html`。
 - 沒辦法執行 Python 的環境（例如只能產生檔案的聊天介面）：把 `assets/template.html` 裡的 `/*__GAME_DATA__*/null` 換成資料 JSON，`images` 欄位放 `{"egg": "<egg.webp 的 data URI>", "bg": ..., "shiba": ..., ...}`，`__PAGE_TITLE__` 換成標題。能跑腳本就一定用腳本。
 
-### 5. 交付
+### 4. 交付
 
 告訴使用者：
 
