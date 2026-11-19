@@ -92,6 +92,7 @@
     .btn-mic { background: #e2553a; color: #fff; }
     .btn-mic.rec { background: #a81f3d; animation: btRec 1s steps(2) infinite; }
     .btn-go { background: #ffb545; color: #3c2a1c; }
+    .btn.btn-icon { width: 58px; height: 52px; padding: 0; font-size: 28px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
 
     #flash { position: fixed; left: 50%; top: 26%; transform: translate(-50%, -50%); z-index: 30; font-size: 52px; font-weight: 900; color: #fff; -webkit-text-stroke: 2px #4a3424; text-shadow: 0 5px 0 #4a3424; pointer-events: none; opacity: 0; transition: opacity .2s; white-space: nowrap; }
 
@@ -160,6 +161,7 @@
       #cardZh { font-size: 15px; }
       #cardBtns { margin-top: 5px; gap: 6px; }
       .btn { font-size: 14px; padding: 5px 10px; }
+      .btn.btn-icon { width: 46px; height: 38px; font-size: 22px; }
       #feedback { font-size: 13px; min-height: 0; margin-top: 3px; }
     }
   </style>
@@ -382,7 +384,6 @@ const GAME = {"title": "魔法寵物孵化屋", "subtitle": "我的夢想單字"
     speechSynthesis.speak(u);
   }
   const playWord = w => speak(w.say || w.en.replace(/\s*\/\s*/g, ', '), 0.85);
-  const playSent = w => speak(w.sent.replace(/<[^>]+>/g, ''), 0.85);
 
   // ==================== 聽學生唸 ====================
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -419,7 +420,7 @@ const GAME = {"title": "魔法寵物孵化屋", "subtitle": "我的夢想單字"
     if (rec) { try { rec.abort(); } catch (e) { } rec = null; }
     if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
     $('meter').style.display = 'none';
-    const b = $('micBtn'); if (b) { b.classList.remove('rec'); b.textContent = '🎤 我來唸'; }
+    const b = $('micBtn'); if (b) { b.classList.remove('rec'); b.textContent = '🎤'; b.title = '我來唸'; }
   }
   function startListen() {
     if (S.busy) return;
@@ -427,7 +428,7 @@ const GAME = {"title": "魔法寵物孵化屋", "subtitle": "我的夢想單字"
     const w = WORDS[S.cur];
     if (window.speechSynthesis) speechSynthesis.cancel();
     listening = true;
-    $('micBtn').classList.add('rec'); $('micBtn').textContent = '👂 我在聽…（再按一次停止）';
+    $('micBtn').classList.add('rec'); $('micBtn').textContent = '👂'; $('micBtn').title = '我在聽…再按一次停止';
     $('feedback').innerHTML = `<span style="color:#b4233a">🎤 請大聲唸：<span class="en">${esc(w.en)}</span></span>`;
     if (!srBroken) listenSR(w); else listenVolume();
     listenTimer = setTimeout(() => { if (listening) { stopMic(); missed(); } }, 7000);
@@ -547,11 +548,9 @@ const GAME = {"title": "魔法寵物孵化屋", "subtitle": "我的夢想單字"
     $('cardPic').innerHTML = pic ? `<img src="${pic}" alt="${esc(w.en)}">` : esc(w.emoji || '🔤');
     $('cardWord').textContent = w.en; $('cardZh').textContent = w.zh;
     $('cardSent').innerHTML = w.sent ? sentHtml(w.sent) + (w.sentZh ? `<small>${esc(w.sentZh)}</small>` : '') : '';
-    $('cardBtns').innerHTML = `<button class="btn btn-listen" id="lisBtn">🔊 聽發音</button>` +
-      (w.sent ? `<button class="btn btn-sub" id="sentBtn">🔊 例句</button>` : '') +
-      `<button class="btn btn-mic" id="micBtn">🎤 我來唸</button>`;
+    $('cardBtns').innerHTML = `<button class="btn btn-icon btn-listen" id="lisBtn" title="聽發音" aria-label="聽發音">🔊</button>` +
+      `<button class="btn btn-icon btn-mic" id="micBtn" title="我來唸" aria-label="我來唸">🎤</button>`;
     $('lisBtn').onclick = () => playWord(w); $('micBtn').onclick = startListen;
-    if ($('sentBtn')) $('sentBtn').onclick = () => playSent(w);
     $('feedback').innerHTML = done ? '✅ 已經破蛋出生了！想再練習可以按 🎤（不會再加分）。' : '先按 🔊 聽一次，再按 🎤 大聲唸出來餵食物！';
     $('card').style.display = 'block';
     renderEnergy(); renderHud(); renderNests();
