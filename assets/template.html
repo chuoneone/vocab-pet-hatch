@@ -209,7 +209,7 @@
     <div class="panel bt-box intro-panel">
       <h2>🥚 <span id="introTitle"></span></h2>
       <p id="introText" class="intro-sub"></p>
-      <p class="intro-main">大聲唸單字，餵蛋裡的寵物。<br>吃飽 6 個就破蛋出生！</p>
+      <p class="intro-main" id="introMain">大聲唸單字，餵蛋裡的寵物。<br>吃飽 6 個就破蛋出生！</p>
       <div class="warn" id="srWarn">⚠️ 這個瀏覽器聽不懂單字，請改用電腦版 Chrome 或 Edge。</div>
       <div style="text-align:center"><button class="btn btn-go" id="startBtn" style="font-size:22px;padding:11px 34px">開始孵蛋 ▶</button></div>
     </div>
@@ -251,12 +251,17 @@ const GAME = /*__GAME_DATA__*/null;
   // 例句只允許 <mark> 標記，其餘一律轉成文字
   const sentHtml = s => esc(s).replace(/&lt;(\/?)mark&gt;/g, '<$1mark>');
 
+  // 中文、日文、韓文：沒有空格分詞，評分改用整串比對
+  const isCJK = s => /[぀-ヿ㐀-鿿豈-﫿가-힯]/.test(s);
   const WORDS = GAME.words.slice(0, PETS.length).map((w, i) => {
     const p = PETS[i];
-    const short = w.short || w.en.split('/')[0].trim();
+    const en = w.en || w.word || '';
+    const short = w.short || en.split('/')[0].trim();
+    // 英文單字提示中文意思；國文等本身就是中文的字詞，直接提示要唸的字
+    const cue = isCJK(en) ? en.split('/')[0].trim() : (w.zh || en);
     return Object.assign({}, w, {
-      short, pet: p.key, petName: p.name, who: p.name + '蛋', food: p.food, foodName: p.foodName,
-      line: w.line || `${p.food} ${p.name}蛋肚子好餓！唸出「${w.zh}」，餵牠吃${p.foodName}！`
+      en, short, pet: p.key, petName: p.name, who: p.name + '蛋', food: p.food, foodName: p.foodName,
+      line: w.line || `${p.food} ${p.name}蛋肚子好餓！唸出「${cue}」，餵牠吃${p.foodName}！`
     });
   });
   const LANG = GAME.lang || 'en-US';
@@ -271,7 +276,10 @@ const GAME = /*__GAME_DATA__*/null;
   $('introTitle').textContent = GAME.title;
   $('petImg').src = petSrc('egg');
   $('petImg').classList.add('wobble');
-  $('introText').textContent = (GAME.subtitle ? GAME.subtitle + ' · ' : '') + `${WORDS.length} 個單字`;
+  const UNIT = WORDS.some(w => isCJK(w.en)) ? '語詞' : '單字';
+  $('introText').textContent = (GAME.subtitle ? GAME.subtitle + ' · ' : '') + `${WORDS.length} 個${UNIT}`;
+  $('introMain').innerHTML = `大聲唸${UNIT}，餵蛋裡的寵物。<br>吃飽 6 個就破蛋出生！`;
+  $('srWarn').textContent = `⚠️ 這個瀏覽器聽不懂你唸的${UNIT}，請改用電腦版 Chrome 或 Edge。`;
   $('finTitle').textContent = `🎉 ${WORDS.length} 隻寵物全部破蛋出生了！`;
 
   // ==================== 存檔（只存在這台電腦的瀏覽器） ====================
@@ -384,7 +392,7 @@ const GAME = /*__GAME_DATA__*/null;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   let srBroken = !SR, rec = null, micStream = null, audioCtx = null, micTimer = null, listenTimer = null, listening = false, misses = 0;
   if (!SR) $('srWarn').style.display = 'block';
-  const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const norm = s => s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
   function lev(a, b) {
     const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
     for (let j = 1; j <= b.length; j++) d[0][j] = j;
@@ -392,10 +400,30 @@ const GAME = /*__GAME_DATA__*/null;
       d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
     return d[a.length][b.length];
   }
+  // 在聽到的一整串裡，找最像目標的一段（中文辨識常多出「的」「啊」或整句話）
+  function windowDist(whole, target) {
+    let best = lev(whole, target);
+    for (let len = Math.max(1, target.length - 1); len <= target.length + 1; len++)
+      for (let i = 0; i + len <= whole.length; i++) best = Math.min(best, lev(whole.slice(i, i + len), target));
+    return best;
+  }
+  function gradeCJK(targets, near, alts) {
+    let best = 1;
+    alts.forEach(t => {
+      const whole = norm(t);
+      targets.forEach(target => {
+        if (whole.includes(target)) best = 3;
+        else if (near.some(x => x && whole.includes(x)) ||
+          (target.length >= 2 && windowDist(whole, target) <= Math.max(1, Math.floor(target.length / 3)))) best = Math.max(best, 2);
+      });
+    });
+    return best;
+  }
   // 3 = 唸對、2 = 很接近、1 = 有開口
   function grade(w, alts) {
     const targets = w.en.split('/').map(norm).filter(Boolean);
     const near = (w.soundalike || []).map(norm);
+    if (targets.some(isCJK)) return gradeCJK(targets, near, alts);
     const parts = w.en.split(/[\s\/]+/).map(norm).filter(p => p.length >= 3);
     let best = 1;
     alts.forEach(t => {

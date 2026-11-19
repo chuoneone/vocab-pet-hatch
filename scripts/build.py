@@ -13,6 +13,7 @@ import base64
 import json
 import math
 import mimetypes
+import re
 import sys
 from pathlib import Path
 
@@ -22,6 +23,7 @@ PET_DIR = SKILL_DIR / "assets" / "pets"
 PET_KEYS = ["shiba", "calico", "bunny", "hedgehog", "chick", "owl", "corgi", "red-panda", "penguin"]
 MAX_WORDS = len(PET_KEYS)
 PLACEHOLDER = "/*__GAME_DATA__*/null"
+CJK = re.compile(r"[぀-ヿ㐀-鿿豈-﫿가-힯]")
 
 mimetypes.add_type("image/webp", ".webp")
 
@@ -34,11 +36,13 @@ def data_uri(path: Path) -> str:
 def check_words(words):
     errors = []
     for n, w in enumerate(words, 1):
-        for key in ("en", "zh"):
-            if not str(w.get(key, "")).strip():
-                errors.append(f"第 {n} 個單字缺少 \"{key}\"")
+        word = str(w.get("en") or w.get("word") or "").strip()
+        if not word:
+            errors.append(f"第 {n} 個字詞缺少要唸的內容（\"word\" 或 \"en\"）")
+        elif not CJK.search(word) and not str(w.get("zh", "")).strip():
+            errors.append(f"第 {n} 個字詞（{word}）缺少中文意思 \"zh\"")
         if w.get("sent") and "<mark>" not in w["sent"]:
-            errors.append(f"第 {n} 個單字（{w.get('en')}）的例句沒有用 <mark> 標出單字")
+            errors.append(f"第 {n} 個字詞（{word}）的例句沒有用 <mark> 標出字詞")
     return errors
 
 
